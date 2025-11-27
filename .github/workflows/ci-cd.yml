@@ -1,0 +1,65 @@
+name: CI/CD Pipeline con Logs
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Instalar dependencias
+        run: npm install
+      - name: Ejecutar pruebas
+        run: npm test
+
+  analyze-logs:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Instalar dependencias
+        run: npm install
+      - name: Ejecutar script de logs
+        run: node logs.js > logs.txt &
+      - name: Esperar y capturar logs
+        run: |
+          sleep 10
+          pkill -f "node logs.js" || true
+          cat logs.txt || echo "No se generaron logs"
+      - name: Buscar errores en logs
+        run: |
+          if grep -q "ERROR" logs.txt 2>/dev/null; then
+            echo "🔴 Se encontraron errores en los logs!"
+            exit 1
+          else
+            echo "✅ No se encontraron errores en los logs."
+          fi
+
+  save-logs:
+    needs: analyze-logs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Instalar dependencias
+        run: npm install
+      - name: Ejecutar script de logs guardados
+        run: |
+          timeout 15s node guardar-logs.js || true
+      - name: Subir logs como artefacto
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs-artifact
+          path: app.log
+          retention-days: 1
