@@ -1,0 +1,13 @@
+{
+    "name": "mi-app-logs",
+    "version": "1.0.0",
+    "description": "Aplicación web con logs y CI/CD",
+    "main": "app.js",
+    "scripts": {
+        "test": "jest",
+        "start": "node app.js"
+    },
+    "devDependencies": {
+        "jest": "^29.0.0"
+    }
+}
