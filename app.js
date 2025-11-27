@@ -35,3 +35,14 @@ function sumar(a, b) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { sumar, saludar, error, registrarLog };
 }
+
+
+
+// Para evitar errores en el navegador
+if (typeof module === 'undefined') {
+    // Estamos en el navegador, no hacer nada
+    console.log("🖥️ Aplicación ejecutándose en el navegador");
+} else {
+    // Estamos en Node.js (para tests)
+    module.exports = { sumar, saludar, error, registrarLog };
+}
